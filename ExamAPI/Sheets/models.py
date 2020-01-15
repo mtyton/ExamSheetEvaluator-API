@@ -30,7 +30,6 @@ class Student(User):
 class ExamSheet(models.Model):
     owner = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
-    length = models.IntegerField()  # TODO max length of a quiz
 
     def __str__(self):
         return self.title
@@ -53,7 +52,7 @@ class Question(models.Model):
 
 class CorrectAnswer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    ans_text = models.CharField(max_length=200)
+    ans_text = models.CharField(max_length=100)
 
     def __str__(self):
         return self.ans_text
@@ -62,6 +61,9 @@ class CorrectAnswer(models.Model):
 class Attempt(models.Model):
     examinee = models.ForeignKey(Student, on_delete=models.CASCADE)
     sheet = models.ForeignKey(ExamSheet, on_delete=models.CASCADE)
+
+    def get_answers_per_attempt(self):
+        answers = GivenAnswer.objects.filter(attempt=self)
 
 
 class GivenAnswer(models.Model):
@@ -72,7 +74,7 @@ class GivenAnswer(models.Model):
     def check_accuracy(self):
         answers = self.to_question.get_answers()
         for ans in answers:
-            if ans == self.given_text:
+            if ans.ans_text == self.given_text:
                 return True
         return False
 
