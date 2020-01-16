@@ -3,13 +3,8 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 
-# teachers are going to be examsheets owner
-class ExamUser(User):
-    pass
-
-
 class ExamSheet(models.Model):
-    owner = models.ForeignKey(ExamUser, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
 
     def __str__(self):
@@ -40,7 +35,7 @@ class CorrectAnswer(models.Model):
 
 
 class Attempt(models.Model):
-    examinee = models.ForeignKey(ExamUser, on_delete=models.CASCADE)
+    examinee = models.ForeignKey(User, on_delete=models.CASCADE)
     sheet = models.ForeignKey(ExamSheet, on_delete=models.CASCADE)
 
     def get_answers_per_attempt(self):

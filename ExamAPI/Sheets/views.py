@@ -1,14 +1,16 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import ExamSheet, Question, CorrectAnswer
-from .models import PointForAnswer, Attempt, Solution, ExamUser
-from .serializers import ExamSheetSerializer, QuestionSerializer, CorrectAnswerSerializer, ExamUserSerializer
+from django.contrib.auth.models import Group
+from .models import ExamSheet, Question, CorrectAnswer, User
+from .models import PointForAnswer, Attempt, Solution
+from .serializers import ExamSheetSerializer, QuestionSerializer, CorrectAnswerSerializer, UserSerializer
 from .serializers import AttemptSerializer, SolutionSerializer, PointForAnswerSerializer
 
 
-class ExamUserView(viewsets.ModelViewSet):
-    queryset = ExamUser.objects.all()
-    serializer_class = ExamUserSerializer
+class UserView(viewsets.ReadOnlyModelViewSet):
+    groups = Group.objects.filter(name__in=["teachers", "students"])
+    queryset = User.objects.filter(groups__in=groups)
+    serializer_class = UserSerializer
 
 
 class ExamSheetView(viewsets.ModelViewSet):

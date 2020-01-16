@@ -1,14 +1,31 @@
 from rest_framework import serializers
-from .models import ExamSheet, Question, Attempt, Solution, CorrectAnswer, PointForAnswer, ExamUser
+from django.contrib.auth.models import Group
+from .models import ExamSheet, Question, Attempt, Solution, CorrectAnswer, PointForAnswer, User
 
 
-class ExamUserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    group = serializers.SerializerMethodField()
+
     class Meta:
-        model = ExamUser
-        fields = '__all__'
+        model = User
+        fields = ['username', 'group', 'url']
+
+    def get_group(self, obj):
+        group = Group.objects.filter(name="teachers")
+        users = User.objects.filter(groups__in=group)
+        if obj in users:
+            return "teacher"
+        else:
+            return "student"
 
 
 class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
+    def __init__(self, *args, **kwargs):
+        super(ExamSheetSerializer, self).__init__(*args, **kwargs)
+        groups = Group.objects.filter(name="teachers")
+        self.fields['owner'].queryset = User.objects.filter(groups__in=groups)
+
+
     questions = serializers.SerializerMethodField()
 
     class Meta:
@@ -47,6 +64,11 @@ class CorrectAnswerSerializer(serializers.HyperlinkedModelSerializer):
 class AttemptSerializer(serializers.HyperlinkedModelSerializer):
     solutions = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        super(AttemptSerializer, self).__init__(*args, **kwargs)
+        groups = Group.objects.filter(name="students")
+        self.fields['examinee'].queryset = User.objects.filter(groups__in=groups)
+
     class Meta:
         model = Attempt
         fields = '__all__'
@@ -63,7 +85,7 @@ class SolutionSerializer(serializers.HyperlinkedModelSerializer):
     points = serializers.SerializerMethodField()
 
     class Meta:
-        model = Attempt
+        model = Solution
         fields = '__all__'
 
     def get_points(self, obj):

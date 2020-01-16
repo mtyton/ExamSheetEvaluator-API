@@ -1,11 +1,12 @@
 from django.test import TestCase
-from .models import ExamSheet, Question, CorrectAnswer, Attempt, Solution, PointForAnswer, ExamUser
-from rest_framework.test import APIRequestFactory
+from .models import ExamSheet, Question, CorrectAnswer, Attempt, Solution, PointForAnswer, User
+from rest_framework.test import APITestCase
+from django.urls import reverse
 
 
 class TestExamSheetModel(TestCase):
     def setUp(self):
-        self.teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
+        self.teacher = User(username="test_teacher", password="testzaq1@WSX")
         self.teacher.save()
         exam = ExamSheet(title="test sheet", owner=self.teacher)
         exam.save()
@@ -22,7 +23,7 @@ class TestExamSheetModel(TestCase):
 
 class TestQuestionModel(TestCase):
     def setUp(self):
-        teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
+        teacher = User(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
         exam = ExamSheet(title="test sheet", owner=teacher)
         exam.save()
@@ -40,7 +41,7 @@ class TestQuestionModel(TestCase):
 
 class TestAtemptModel(TestCase):
     def setUp(self):
-        teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
+        teacher = User(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
         exam = ExamSheet(title="test sheet", owner=teacher)
         exam.save()
@@ -48,7 +49,7 @@ class TestAtemptModel(TestCase):
         question.save()
         corr_ans=CorrectAnswer(question=question, ans_text="testans")
         corr_ans.save()
-        student = ExamUser(username="test student", password="testpassword@#$")
+        student = User(username="test student", password="testpassword@#$")
         student.save()
         self.attempt = Attempt(examinee=student, sheet=exam)
         self.attempt.save()
@@ -60,7 +61,7 @@ class TestAtemptModel(TestCase):
 
 class TestGivenAnswerModel(TestCase):
     def setUp(self):
-        teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
+        teacher = User(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
         exam = ExamSheet(title="test sheet", owner=teacher)
         exam.save()
@@ -68,7 +69,7 @@ class TestGivenAnswerModel(TestCase):
         question.save()
         corr_ans=CorrectAnswer(question=question, ans_text="test_ans")
         corr_ans.save()
-        student = ExamUser(username="test student", password="testpassword@#$")
+        student = User(username="test student", password="testpassword@#$")
         student.save()
         attempt = Attempt(examinee=student, sheet=exam)
         attempt.save()
@@ -83,6 +84,15 @@ class TestGivenAnswerModel(TestCase):
 
 
 # Views test
+class TestExamView(APITestCase):
+
+    def test_adding_sheet(self):
+        user = User.objects.create(username="test_user", password="testPassword")
+        user.save()
+        url = reverse("examsheet-list")
+        data = {'title':"test_title", "owner": }
+        response = self.client.post(url, data, format="json")
+        print(response.data)
 
 
 
