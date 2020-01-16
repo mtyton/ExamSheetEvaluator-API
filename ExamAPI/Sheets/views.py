@@ -1,19 +1,14 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import ExamSheet, Teacher, Question, CorrectAnswer, Student
-from .models import PointForAnswer, Attempt, Solution
-from .serializers import ExamSheetSerializer, TeacherSerializer, QuestionSerializer, CorrectAnswerSerializer, StudentSerializer
+from .models import ExamSheet, Question, CorrectAnswer
+from .models import PointForAnswer, Attempt, Solution, ExamUser
+from .serializers import ExamSheetSerializer, QuestionSerializer, CorrectAnswerSerializer, ExamUserSerializer
 from .serializers import AttemptSerializer, SolutionSerializer, PointForAnswerSerializer
 
 
-class TeacherView(viewsets.ModelViewSet):
-    queryset = Teacher.objects.all()
-    serializer_class = TeacherSerializer
-
-
-class StudentView(viewsets.ModelViewSet):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
+class ExamUserView(viewsets.ModelViewSet):
+    queryset = ExamUser.objects.all()
+    serializer_class = ExamUserSerializer
 
 
 class ExamSheetView(viewsets.ModelViewSet):

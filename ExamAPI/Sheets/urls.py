@@ -1,12 +1,11 @@
 from django.urls import path, include
 from rest_framework import routers
-from.views import ExamSheetView, TeacherView, QuestionView, CorrectAnswerView, StudentView
+from.views import ExamSheetView, QuestionView, CorrectAnswerView, ExamUserView
 from .views import AttemptView, SolutionView, PointView
 
 
 router = routers.DefaultRouter()
-router.register("teacher", TeacherView, basename="teacher")
-router.register("student", StudentView, basename="student")
+router.register("examuser", ExamUserView, basename="examuser")
 router.register("examsheet", ExamSheetView, basename="examsheet")
 router.register("question", QuestionView, basename="question")
 router.register("correct_answer", CorrectAnswerView, basename="correctanswer")

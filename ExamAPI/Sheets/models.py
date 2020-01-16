@@ -4,31 +4,12 @@ from django.contrib.auth.models import User
 
 
 # teachers are going to be examsheets owner
-class Teacher(User):
+class ExamUser(User):
     pass
-
-    class Meta:
-        verbose_name = "Teacher"
-        verbose_name_plural = "Teachers"
-
-    def get_teacher_exams(self):
-        exams = ExamSheet.objects.filter(owner=self)
-        return exams
-
-
-class Student(User):
-
-    class Meta:
-        verbose_name = "S"
-        verbose_name_plural = "Students"
-
-    def get_students_atempts(self):
-        attempts = Attempt.objects.filter(examinee=Student)
-        return attempts
 
 
 class ExamSheet(models.Model):
-    owner = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    owner = models.ForeignKey(ExamUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
 
     def __str__(self):
@@ -59,7 +40,7 @@ class CorrectAnswer(models.Model):
 
 
 class Attempt(models.Model):
-    examinee = models.ForeignKey(Student, on_delete=models.CASCADE)
+    examinee = models.ForeignKey(ExamUser, on_delete=models.CASCADE)
     sheet = models.ForeignKey(ExamSheet, on_delete=models.CASCADE)
 
     def get_answers_per_attempt(self):

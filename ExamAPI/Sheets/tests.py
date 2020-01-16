@@ -1,11 +1,11 @@
 from django.test import TestCase
-from .models import ExamSheet, Question, CorrectAnswer, Student, Teacher, Attempt, Solution, PointForAnswer
+from .models import ExamSheet, Question, CorrectAnswer, Attempt, Solution, PointForAnswer, ExamUser
 from rest_framework.test import APIRequestFactory
 
 
 class TestExamSheetModel(TestCase):
     def setUp(self):
-        self.teacher = Teacher(username="test_teacher", password="testzaq1@WSX")
+        self.teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
         self.teacher.save()
         exam = ExamSheet(title="test sheet", owner=self.teacher)
         exam.save()
@@ -22,7 +22,7 @@ class TestExamSheetModel(TestCase):
 
 class TestQuestionModel(TestCase):
     def setUp(self):
-        teacher = Teacher(username="test_teacher", password="testzaq1@WSX")
+        teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
         exam = ExamSheet(title="test sheet", owner=teacher)
         exam.save()
@@ -40,7 +40,7 @@ class TestQuestionModel(TestCase):
 
 class TestAtemptModel(TestCase):
     def setUp(self):
-        teacher = Teacher(username="test_teacher", password="testzaq1@WSX")
+        teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
         exam = ExamSheet(title="test sheet", owner=teacher)
         exam.save()
@@ -48,7 +48,7 @@ class TestAtemptModel(TestCase):
         question.save()
         corr_ans=CorrectAnswer(question=question, ans_text="testans")
         corr_ans.save()
-        student = Student(username="test student", password="testpassword@#$")
+        student = ExamUser(username="test student", password="testpassword@#$")
         student.save()
         self.attempt = Attempt(examinee=student, sheet=exam)
         self.attempt.save()
@@ -60,7 +60,7 @@ class TestAtemptModel(TestCase):
 
 class TestGivenAnswerModel(TestCase):
     def setUp(self):
-        teacher = Teacher(username="test_teacher", password="testzaq1@WSX")
+        teacher = ExamUser(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
         exam = ExamSheet(title="test sheet", owner=teacher)
         exam.save()
@@ -68,7 +68,7 @@ class TestGivenAnswerModel(TestCase):
         question.save()
         corr_ans=CorrectAnswer(question=question, ans_text="test_ans")
         corr_ans.save()
-        student = Student(username="test student", password="testpassword@#$")
+        student = ExamUser(username="test student", password="testpassword@#$")
         student.save()
         attempt = Attempt(examinee=student, sheet=exam)
         attempt.save()

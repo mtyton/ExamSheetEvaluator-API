@@ -1,35 +1,11 @@
 from rest_framework import serializers
-from .models import ExamSheet, Question, Attempt, Solution, CorrectAnswer, Teacher, Student, PointForAnswer
+from .models import ExamSheet, Question, Attempt, Solution, CorrectAnswer, PointForAnswer, ExamUser
 
 
-class TeacherSerializer(serializers.HyperlinkedModelSerializer):
-    owned_exams = serializers.SerializerMethodField()
-
+class ExamUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Teacher
-        fields = ['url','username', 'password', 'owned_exams']
-
-    def get_owned_exams(self, obj):
-        queryset = ExamSheet.objects.filter(owner=obj)
-        exams = []
-        for q in queryset:
-            exams.append(q.title)
-        return exams
-
-
-class StudentSerializer(serializers.HyperlinkedModelSerializer):
-    attempts = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Student
-        fields = ['url', 'username', 'password', 'attempts']
-
-    def get_attempts(self, obj):
-        queryset = Attempt.objects.filter(examinee=obj)
-        attempts = []
-        for q in queryset:
-            attempts.append(q.url)
-        return attempts
+        model = ExamUser
+        fields = '__all__'
 
 
 class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
