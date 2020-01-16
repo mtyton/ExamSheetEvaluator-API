@@ -1,5 +1,6 @@
 from django.test import TestCase
-from .models import ExamSheet, Question, CorrectAnswer, Student, Teacher, Attempt, GivenAnswer, PointForAnswer
+from .models import ExamSheet, Question, CorrectAnswer, Student, Teacher, Attempt, Solution, PointForAnswer
+from rest_framework.test import APIRequestFactory
 
 
 class TestExamSheetModel(TestCase):
@@ -8,10 +9,6 @@ class TestExamSheetModel(TestCase):
         self.teacher.save()
         exam = ExamSheet(title="test sheet", owner=self.teacher)
         exam.save()
-
-    def test_exam_getting_by_owner(self):
-        exams = ExamSheet.objects.filter(owner=self.teacher)
-        self.assertEqual(len(exams), 1)
 
     def test_questions_for_exam(self):
         exam = ExamSheet.objects.filter(owner=self.teacher).first()
@@ -41,7 +38,7 @@ class TestQuestionModel(TestCase):
         self.assertEqual(len(answers), 2)
 
 
-class TestAtempt(TestCase):
+class TestAtemptModel(TestCase):
     def setUp(self):
         teacher = Teacher(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
@@ -61,7 +58,7 @@ class TestAtempt(TestCase):
         self.assertEqual(len(questions), 1)
 
 
-class TestGivenAnswer(TestCase):
+class TestGivenAnswerModel(TestCase):
     def setUp(self):
         teacher = Teacher(username="test_teacher", password="testzaq1@WSX")
         teacher.save()
@@ -75,11 +72,17 @@ class TestGivenAnswer(TestCase):
         student.save()
         attempt = Attempt(examinee=student, sheet=exam)
         attempt.save()
-        self.give_ans_corr = GivenAnswer(attempt=attempt, to_question=question, given_text="test_ans")
-        self.given_ans_wrong = GivenAnswer(attempt=attempt, to_question=question, given_text="no_ans")
+        self.give_ans_corr = Solution(attempt=attempt, to_question=question, given_text="test_ans")
+        self.given_ans_wrong = Solution(attempt=attempt, to_question=question, given_text="no_ans")
         self.give_ans_corr.save()
         self.given_ans_wrong.save()
 
     def test_checking_answers(self):
         accuracy = self.give_ans_corr.check_accuracy()
         self.assertEqual(accuracy, True)
+
+
+# Views test
+
+
+

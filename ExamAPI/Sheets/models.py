@@ -19,7 +19,7 @@ class Teacher(User):
 class Student(User):
 
     class Meta:
-        verbose_name = "Studnet"
+        verbose_name = "S"
         verbose_name_plural = "Students"
 
     def get_students_atempts(self):
@@ -63,10 +63,10 @@ class Attempt(models.Model):
     sheet = models.ForeignKey(ExamSheet, on_delete=models.CASCADE)
 
     def get_answers_per_attempt(self):
-        answers = GivenAnswer.objects.filter(attempt=self)
+        answers = Solution.objects.filter(attempt=self)
 
 
-class GivenAnswer(models.Model):
+class Solution(models.Model):
     attempt = models.ForeignKey(Attempt, on_delete=models.CASCADE)
     to_question = models.ForeignKey(Question, on_delete=models.CASCADE)
     given_text = models.CharField(max_length=100)
@@ -80,5 +80,5 @@ class GivenAnswer(models.Model):
 
 
 class PointForAnswer(models.Model):
-    answer = models.ForeignKey(GivenAnswer, on_delete=models.CASCADE)
+    answer = models.ForeignKey(Solution, on_delete=models.CASCADE)
     points = models.IntegerField()
