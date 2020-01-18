@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from django.contrib.auth.models import Group, User
-from .models import ExamSheet, Question, CorrectAnswer
-from .models import PointForAnswer, Attempt, Solution
-from .serializers import ExamSheetSerializer, QuestionSerializer, CorrectAnswerSerializer, UserSerializer
-from .serializers import AttemptSerializer, SolutionSerializer, PointForAnswerSerializer
-from .permissions import IsOwnerOrReadOnly, IsTeacher
+from .models import ExamSheet, Question
+from .models import Point, Solution, Grade
+from .serializers import ExamSheetSerializer, QuestionSerializer, UserSerializer
+from .serializers import SolutionSerializer, PointSerializer, GradeSerializer
+from .permissions import IsOwnerOrReadOnly, IsSheetOwnerOrReadOnly, IsExamineeOrReadOnly, GradePermissions, PointPermissions
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -24,24 +24,22 @@ class ExamSheetView(viewsets.ModelViewSet):
 class QuestionView(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-
-
-class CorrectAnswerView(viewsets.ModelViewSet):
-    queryset = CorrectAnswer.objects.all()
-    serializer_class = CorrectAnswerSerializer
-    permission_classes = [IsTeacher, IsAuthenticated]
-
-
-class AttemptView(viewsets.ModelViewSet):
-    queryset = Attempt.objects.all()
-    serializer_class = AttemptSerializer
+    permission_classes = [IsSheetOwnerOrReadOnly, ]
 
 
 class SolutionView(viewsets.ModelViewSet):
     queryset = Solution.objects.all()
     serializer_class = SolutionSerializer
+    permission_classes = [IsExamineeOrReadOnly, ]
 
 
 class PointView(viewsets.ModelViewSet):
-    queryset = PointForAnswer.objects.all()
-    serializer_class = PointForAnswerSerializer
+    queryset = Point.objects.all()
+    serializer_class = PointSerializer
+    permission_classes = [PointPermissions]
+
+
+class GradeView(viewsets.ModelViewSet):
+    queryset = Grade.objects.all()
+    serializer_class = GradeSerializer
+    permission_classes = [GradePermissions, ]

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 
 class ExamSheet(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     title = models.CharField(max_length=100)
 
     def __str__(self):
@@ -16,38 +16,20 @@ class ExamSheet(models.Model):
 
 
 class Question(models.Model):
-    sheet = models.ForeignKey(ExamSheet, on_delete=models.CASCADE)
+    sheet = models.ForeignKey(ExamSheet, on_delete=models.DO_NOTHING)
     text = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.text
+        return "Test " + str(self.sheet) + " - Question: " + str(self.text)
 
-    def get_answers(self):
-        return CorrectAnswer.objects.filter(question=self)
-
-
-class CorrectAnswer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    ans_text = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.ans_text
-
-
-class Attempt(models.Model):
-    examinee = models.ForeignKey(User, on_delete=models.CASCADE)
-    sheet = models.ForeignKey(ExamSheet, on_delete=models.CASCADE)
-
-    def get_answers_per_attempt(self):
-        answers = Solution.objects.filter(attempt=self)
-
-    def __str__(self):
-        return str(self.examinee) + " to sheet: " + str(self.sheet)
+    def get_solutions(self, examinee):
+        solutions = Solution.objects.filter(examinee=examinee, to_question=self)
+        return solutions
 
 
 class Solution(models.Model):
-    attempt = models.ForeignKey(Attempt, on_delete=models.CASCADE)
-    to_question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    examinee = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    to_question = models.ForeignKey(Question, on_delete=models.DO_NOTHING)
     given_text = models.CharField(max_length=100)
 
     def check_accuracy(self):
@@ -58,9 +40,19 @@ class Solution(models.Model):
         return False
 
     def __str__(self):
-        return str(self.to_question)+ ": " + str(self.given_text)
+        return "Asnwer: "+ str(self.given_text) + " BY: " + str(self.examinee)
+
+    def get_points(self):
+        points = Point.objects.filter(answer=self).first()
+        return points
 
 
-class PointForAnswer(models.Model):
-    answer = models.ForeignKey(Solution, on_delete=models.CASCADE)
+class Point(models.Model):
+    answer = models.OneToOneField(Solution, on_delete=models.DO_NOTHING, unique=True)
     points = models.IntegerField()
+
+
+class Grade(models.Model):
+    sheet = models.ForeignKey(ExamSheet, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    mark = models.IntegerField()

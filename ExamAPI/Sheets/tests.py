@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import Group, User
-from .models import ExamSheet, Question, CorrectAnswer, Attempt, Solution, PointForAnswer
+from .models import ExamSheet, Question, CorrectAnswer, Attempt, Solution, Point
 from rest_framework.test import APIRequestFactory, APITestCase
 from django.urls import reverse
 from .views import UserView, ExamSheetView

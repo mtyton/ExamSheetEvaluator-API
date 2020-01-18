@@ -15,12 +15,18 @@ class IsOwnerOrReadOnly(BasePermission):
         return request.user == obj.owner
 
 
-class IsTeacher(BasePermission):
+class IsSheetOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        groups = request.user.groups
-        if request.user.groups.filter(name='teachers'):
+        if request.method in SAFE_METHODS:
             return True
-        return False
+
+        return request.user.groups.filter(name='teachers')
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return request.user == obj.sheet.owner
 
 
 class IsExamineeOrReadOnly(BasePermission):
@@ -29,3 +35,31 @@ class IsExamineeOrReadOnly(BasePermission):
             return True
 
         return request.user == obj.examinee
+
+
+class PointPermissions(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return request.user.groups.filter(name='teachers')
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return request.user == obj.answer.question.sheet.owner
+
+
+class GradePermissions(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return request.user.groups.filter(name='teachers')
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return request.user == obj.sheet.owner

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group,User
-from .models import ExamSheet, Question, Attempt, Solution, CorrectAnswer, PointForAnswer
+from .models import ExamSheet, Question, Solution,  Point, Grade
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -11,6 +11,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['username', 'group', 'url']
 
     def get_group(self, obj):
+        """
+        Simply returns a groups name to which user belongs
+        """
         group = Group.objects.filter(name="teachers")
         users = User.objects.filter(groups__in=group)
         if obj in users:
@@ -22,7 +25,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
         super(ExamSheetSerializer, self).__init__(*args, **kwargs)
-        users = User.objects.filter(id = self.context['request'].user.id)
+        users = User.objects.filter(id=self.context['request'].user.id)
         self.fields['owner'].queryset = users
 
     questions = serializers.SerializerMethodField()
@@ -32,6 +35,9 @@ class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def get_questions(self, obj):
+        """
+        Simply returns all questions which belongs to this examsheet
+        """
         queryset = Question.objects.filter(sheet=obj)
         questions = []
         for q in queryset:
@@ -40,8 +46,6 @@ class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
-    correct_answers = serializers.SerializerMethodField()
-
     def __init__(self, *args, **kwargs):
         super(QuestionSerializer, self).__init__(*args, **kwargs)
         user = self.context['request'].user
@@ -52,72 +56,40 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         model = Question
         fields = '__all__'
 
-    def get_correct_answers(self, obj):
-        queryset = CorrectAnswer.objects.filter(question=obj)
-        answers = []
-        for q in queryset:
-            answers.append(q.ans_text)
-        return answers
 
-
-class CorrectAnswerSerializer(serializers.HyperlinkedModelSerializer):
-    def __init__(self, *args, **kwargs):
-        super(CorrectAnswerSerializer, self).__init__(*args, **kwargs)
-        user = self.context['request'].user
-        exams = ExamSheet.objects.filter(owner=user)
-        questions = []
-        for e in exams:
-            new_questions = e.get_questions()
-            questions += new_questions
-        self.fields['question'].queryset = CorrectAnswer.objects.filter(question__in=questions)
-
-    class Meta:
-        model = CorrectAnswer
-        fields = '__all__'
-
-
-class AttemptSerializer(serializers.HyperlinkedModelSerializer):
-    solutions = serializers.SerializerMethodField()
+# BIG PROBLEM WITH THIS FOREIGN KEYES
+class SolutionSerializer(serializers.HyperlinkedModelSerializer):
 
     def __init__(self, *args, **kwargs):
-        super(AttemptSerializer, self).__init__(*args, **kwargs)
+        super(SolutionSerializer, self).__init__(*args, **kwargs)
         groups = Group.objects.filter(name="students")
         self.fields['examinee'].queryset = User.objects.filter(groups__in=groups)
 
     class Meta:
-        model = Attempt
+        model = Solution
+        fields = ['examinee', 'to_question', 'given_text']
+
+
+class PointSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Point
         fields = '__all__'
 
-    def get_solutions(self, obj):
-        queryset = Solution.objects.filter(attempt=obj)
-        solutions = []
-        for q in queryset:
-            solutions.append(q.ans_text)
-        return solutions
+    def validate_points(self, data):
+        if data> 1:
+            data = 1
+        elif data < 0:
+            data=0
+        return data
 
 
-class SolutionSerializer(serializers.HyperlinkedModelSerializer):
-    points = serializers.SerializerMethodField()
-
+class GradeSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
-        super(SolutionSerializer, self).__init__(*args, **kwargs)
-        user = self.context['request'].user
-        self.fields['attempt'].queryset = Attempt.objects.filter(examinee=user)
+        super(GradeSerializer, self).__init__(*args, **kwargs)
+        groups = Group.objects.filter(name="students")
+        self.fields['user'].queryset = User.objects.filter(groups__in=groups)
 
     class Meta:
-        model = Solution
-        fields = ['attempt', 'given_text', 'points']
-
-    def get_points(self, obj):
-        queryset = PointForAnswer.objects.filter(solution=obj)
-        solutions = []
-        for q in queryset:
-            solutions.append(q.ans_text)
-        return solutions
-
-
-class PointForAnswerSerializer(serializers.HyperlinkedModelSerializer):
-
-    class Meta:
-        model = PointForAnswer
+        model = Grade
         fields = '__all__'
