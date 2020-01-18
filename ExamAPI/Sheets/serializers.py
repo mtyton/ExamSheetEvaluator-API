@@ -22,9 +22,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
         super(ExamSheetSerializer, self).__init__(*args, **kwargs)
-        groups = Group.objects.filter(name="teachers")
-        self.fields['owner'].queryset = User.objects.filter(groups__in=groups)
-
+        users = User.objects.filter(id = self.context['request'].user.id)
+        self.fields['owner'].queryset = users
 
     questions = serializers.SerializerMethodField()
 
@@ -43,6 +42,12 @@ class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     correct_answers = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        super(QuestionSerializer, self).__init__(*args, **kwargs)
+        user = self.context['request'].user
+        exams = ExamSheet.objects.filter(owner=user)
+        self.fields['sheet'].queryset = exams
+
     class Meta:
         model = Question
         fields = '__all__'
@@ -56,6 +61,16 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CorrectAnswerSerializer(serializers.HyperlinkedModelSerializer):
+    def __init__(self, *args, **kwargs):
+        super(CorrectAnswerSerializer, self).__init__(*args, **kwargs)
+        user = self.context['request'].user
+        exams = ExamSheet.objects.filter(owner=user)
+        questions = []
+        for e in exams:
+            new_questions = e.get_questions()
+            questions += new_questions
+        self.fields['question'].queryset = CorrectAnswer.objects.filter(question__in=questions)
+
     class Meta:
         model = CorrectAnswer
         fields = '__all__'
@@ -84,9 +99,14 @@ class AttemptSerializer(serializers.HyperlinkedModelSerializer):
 class SolutionSerializer(serializers.HyperlinkedModelSerializer):
     points = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        super(SolutionSerializer, self).__init__(*args, **kwargs)
+        user = self.context['request'].user
+        self.fields['attempt'].queryset = Attempt.objects.filter(examinee=user)
+
     class Meta:
         model = Solution
-        fields = '__all__'
+        fields = ['attempt', 'given_text', 'points']
 
     def get_points(self, obj):
         queryset = PointForAnswer.objects.filter(solution=obj)

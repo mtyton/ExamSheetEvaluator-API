@@ -41,6 +41,9 @@ class Attempt(models.Model):
     def get_answers_per_attempt(self):
         answers = Solution.objects.filter(attempt=self)
 
+    def __str__(self):
+        return str(self.examinee) + " to sheet: " + str(self.sheet)
+
 
 class Solution(models.Model):
     attempt = models.ForeignKey(Attempt, on_delete=models.CASCADE)
@@ -53,6 +56,9 @@ class Solution(models.Model):
             if ans.ans_text == self.given_text:
                 return True
         return False
+
+    def __str__(self):
+        return str(self.to_question)+ ": " + str(self.given_text)
 
 
 class PointForAnswer(models.Model):

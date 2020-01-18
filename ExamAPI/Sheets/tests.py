@@ -117,7 +117,7 @@ class TestExamSheet(APITestCase):
     def test_get_sheet(self):
         url = reverse("examsheet-list")
         response = self.client.get(url)
-        
+
 
     def test_post_sheet(self):
         url = reverse("examsheet-list")
