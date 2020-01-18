@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from django.contrib.auth.models import Group
-from .models import ExamSheet, Question, CorrectAnswer, User
+from django.contrib.auth.models import Group, User
+from .models import ExamSheet, Question, CorrectAnswer
 from .models import PointForAnswer, Attempt, Solution
 from .serializers import ExamSheetSerializer, QuestionSerializer, CorrectAnswerSerializer, UserSerializer
 from .serializers import AttemptSerializer, SolutionSerializer, PointForAnswerSerializer

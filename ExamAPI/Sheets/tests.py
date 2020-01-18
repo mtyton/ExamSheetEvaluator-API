@@ -1,7 +1,9 @@
 from django.test import TestCase
-from .models import ExamSheet, Question, CorrectAnswer, Attempt, Solution, PointForAnswer, User
-from rest_framework.test import APITestCase
+from django.contrib.auth.models import Group, User
+from .models import ExamSheet, Question, CorrectAnswer, Attempt, Solution, PointForAnswer
+from rest_framework.test import APIRequestFactory, APITestCase
 from django.urls import reverse
+from .views import UserView, ExamSheetView
 
 
 class TestExamSheetModel(TestCase):
@@ -84,15 +86,46 @@ class TestGivenAnswerModel(TestCase):
 
 
 # Views test
-class TestExamView(APITestCase):
+class TestUserView(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="test_user", password="testPassword")
+        group = Group.objects.create(name="teachers")
+        group.save()
+        self.user.groups.add(group.id)
+        self.user.save()
+        self.factory = APIRequestFactory()
 
-    def test_adding_sheet(self):
+    def test_get(self):
+        url = reverse("user-list")
+        request = self.factory.get("")
+        view = UserView.as_view({"get":"list"})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data[0]['group'], "teacher")
+
+
+class TestExamSheet(APITestCase):
+    def setUp(self):
         user = User.objects.create(username="test_user", password="testPassword")
+        group = Group.objects.create(name="teachers")
+        group.save()
+        user.groups.add(group.id)
         user.save()
-        url = reverse("examsheet-list")
-        data = {'title':"test_title", "owner": }
-        response = self.client.post(url, data, format="json")
-        print(response.data)
+        self.user_url = reverse("user-detail", args=(user.id,))
+        self.client.force_login(user)
 
+    def test_get_sheet(self):
+        url = reverse("examsheet-list")
+        response = self.client.get(url)
+        
+
+    def test_post_sheet(self):
+        url = reverse("examsheet-list")
+        data = {'title':"testTitle", 'owner':self.user_url}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data[0]['title'], data['title'])
 
 
