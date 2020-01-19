@@ -1,14 +1,14 @@
 # ExamSheetEvaluator-API
-
-
+All data necessary to log into user account is in file auths.txt
 ## How to run it?
  - First Download the repo and unpack
  - Enter directory where you unpacked by terminal/cmd
  - In te same directory create virtual environment
  - Activate environment and install necessary libs which you find in [requirements.txt](https://github.com/mtyton/ExamSheetEvaluator-API/blob/master/requirements)
  - Enter ExamApi directory
+ - ```python3 manage.py makemigrations ```
  - ```python3 manage.py migrate ```
- - ```python3 manage.py loaddata fixtures/initial_data.json```
+ - ```python3 manage.py loaddata fixtures/initial_data.json``` use this to load fixtures
  - now finally you can run ```python3 manage.py runserver```
  
 ## About project
