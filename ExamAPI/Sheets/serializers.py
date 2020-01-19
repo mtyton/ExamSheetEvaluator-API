@@ -3,12 +3,13 @@ from django.contrib.auth.models import Group,User
 from .models import ExamSheet, Question, Solution,  Point, Grade
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     group = serializers.SerializerMethodField()
+    owned_exams = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['username', 'group', 'url']
+        fields = ['username', 'group','owned_exams', 'url']
 
     def get_group(self, obj):
         """
@@ -21,9 +22,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         else:
             return "student"
 
+    def get_owned_exams(self, obj):
+        """
+        Get exams owned by teacher
+        """
+        exams = []
+        queryset = ExamSheet.objects.filter(owner=obj)
+        for q in queryset:
+            exams.append(q.title)
+        return exams
+
 
 class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
+        """
+        Teacher can only add examsheet with himself as an owner
+        """
         super(ExamSheetSerializer, self).__init__(*args, **kwargs)
         users = User.objects.filter(id=self.context['request'].user.id)
         self.fields['owner'].queryset = users
@@ -47,6 +61,9 @@ class ExamSheetSerializer(serializers.HyperlinkedModelSerializer):
 
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
+        """
+        Teacher can add questions only to exams he owns
+        """
         super(QuestionSerializer, self).__init__(*args, **kwargs)
         user = self.context['request'].user
         exams = ExamSheet.objects.filter(owner=user)
@@ -61,6 +78,9 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 class SolutionSerializer(serializers.HyperlinkedModelSerializer):
 
     def __init__(self, *args, **kwargs):
+        """
+        Examinee have to be in students group
+        """
         super(SolutionSerializer, self).__init__(*args, **kwargs)
         groups = Group.objects.filter(name="students")
         self.fields['examinee'].queryset = User.objects.filter(groups__in=groups)
@@ -70,13 +90,17 @@ class SolutionSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['examinee', 'to_question', 'given_text']
 
 
-class PointSerializer(serializers.HyperlinkedModelSerializer):
+class PointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Point
         fields = '__all__'
 
     def validate_points(self, data):
+        """
+        only can assign 0 or 1 point
+        so if gives higher/lower we change it
+        """
         if data> 1:
             data = 1
         elif data < 0:
@@ -86,6 +110,9 @@ class PointSerializer(serializers.HyperlinkedModelSerializer):
 
 class GradeSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
+        """
+        User have to be in students group
+        """
         super(GradeSerializer, self).__init__(*args, **kwargs)
         groups = Group.objects.filter(name="students")
         self.fields['user'].queryset = User.objects.filter(groups__in=groups)

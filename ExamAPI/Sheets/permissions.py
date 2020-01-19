@@ -1,7 +1,10 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsOwnerOrReadOnly(BasePermission):
+class ExamSheetPermission(BasePermission):
+    """
+    Permission for ExamSheet allows to readonly if you are not the owner
+    """
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
@@ -15,7 +18,10 @@ class IsOwnerOrReadOnly(BasePermission):
         return request.user == obj.owner
 
 
-class IsSheetOwnerOrReadOnly(BasePermission):
+class QuestionPermission(BasePermission):
+    """
+    If yu are not the owner of any examsheet you can't add question to any
+    """
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
@@ -38,6 +44,9 @@ class IsExamineeOrReadOnly(BasePermission):
 
 
 class PointPermissions(BasePermission):
+    """
+    You can only add points if answer has been given to exam you own
+    """
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
@@ -52,6 +61,9 @@ class PointPermissions(BasePermission):
 
 
 class GradePermissions(BasePermission):
+    """
+    You can only give grades if you are a teacher and only for exams you own
+    """
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True

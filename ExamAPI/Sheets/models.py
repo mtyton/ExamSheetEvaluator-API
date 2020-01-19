@@ -22,7 +22,14 @@ class Question(models.Model):
     def __str__(self):
         return "Test " + str(self.sheet) + " - Question: " + str(self.text)
 
-    def get_solutions(self, examinee):
+    def get_solutions(self):
+        solutions = Solution.objects.filter(to_question=self)
+        return solutions
+
+    def get_solutions_for_student(self, examinee):
+        """
+        get all solutions for this question but only for one student
+        """
         solutions = Solution.objects.filter(examinee=examinee, to_question=self)
         return solutions
 
@@ -31,18 +38,15 @@ class Solution(models.Model):
     examinee = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     to_question = models.ForeignKey(Question, on_delete=models.DO_NOTHING)
     given_text = models.CharField(max_length=100)
-
-    def check_accuracy(self):
-        answers = self.to_question.get_answers()
-        for ans in answers:
-            if ans.ans_text == self.given_text:
-                return True
-        return False
+    # date = models.DateField(default=date) # TODO propable to add
 
     def __str__(self):
         return "Asnwer: "+ str(self.given_text) + " BY: " + str(self.examinee)
 
     def get_points(self):
+        """
+        get points for this question
+        """
         points = Point.objects.filter(answer=self).first()
         return points
 
