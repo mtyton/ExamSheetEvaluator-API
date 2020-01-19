@@ -94,7 +94,10 @@ class SolutionSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_score(self, obj):
         score = Point.objects.filter(answer=obj.id).first()
-        return score.points
+        if score:
+            return score.points
+        else:
+            return 0
 
 
 class PointSerializer(serializers.ModelSerializer):

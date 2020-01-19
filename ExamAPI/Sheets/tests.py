@@ -69,7 +69,6 @@ class TestUserView(TestCase):
         view = UserView.as_view({"get":"list"})
         response = view(request)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0]['group'], "teacher")
 
 
 class TestExamSheetView(APITestCase):
@@ -94,7 +93,18 @@ class TestExamSheetView(APITestCase):
         self.assertEqual(response.status_code, 201)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0]['title'], data['title'])
+
+    def test_wrong_post_sheet(self):
+        url = reverse("examsheet-list")
+        fake_user = User.objects.create(username="fake_test_user", password="testPassword")
+        group = Group.objects.create(name="students")
+        group.save()
+        fake_user.groups.add(group.id)
+        fake_user.save()
+        fake_url = reverse("user-detail", args=(fake_user.id,))
+        data = {'title':"testTitle", 'owner':fake_url}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
 
 
 class TestQuestionView(APITestCase):
@@ -120,7 +130,18 @@ class TestQuestionView(APITestCase):
         self.assertEqual(response.status_code, 201)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0]['text'], data['text'])
+
+    def test_wrong_post_question(self):
+        url = reverse("examsheet-list")
+        fake_user = User.objects.create(username="fake_test_user", password="testPassword")
+        group=Group.objects.filter(name="teachers").first()
+        fake_user.groups.add(group.id)
+        fake_user.save()
+        exam = ExamSheet.objects.create(owner=fake_user, title='fake')
+        fake_exam_url = reverse("examsheet-detail", args=(exam.id,))
+        data = {'text': 'test_text', 'sheet': fake_exam_url}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
 
 
 class TestSolutionView(APITestCase):
@@ -149,7 +170,6 @@ class TestSolutionView(APITestCase):
         self.assertEqual(response.status_code, 201)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0]['given_text'], data['given_text'])
 
 
 class TestPointView(APITestCase):
@@ -181,7 +201,6 @@ class TestPointView(APITestCase):
         self.assertEqual(response.status_code, 201)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0]['points'], data['points'])
 
 
 class GradeView(APITestCase):
@@ -212,4 +231,3 @@ class GradeView(APITestCase):
         self.assertEqual(response.status_code, 201)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0]['mark'], data['mark'])

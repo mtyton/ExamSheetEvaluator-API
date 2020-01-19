@@ -36,6 +36,9 @@ class QuestionPermission(BasePermission):
 
 
 class IsExamineeOrReadOnly(BasePermission):
+    """
+        Only examinee can give solutions fo questions
+    """
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
