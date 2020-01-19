@@ -1,0 +1,6 @@
+User                  Password
+admin                 adminzaq1@WSX
+teacher               zaq1@WSX
+second_teacher        zaq1@WSX
+student               zaq1@WSX
+second_student        zaq1@WSX
