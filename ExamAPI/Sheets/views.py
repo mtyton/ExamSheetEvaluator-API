@@ -7,6 +7,7 @@ from .serializers import ExamSheetSerializer, QuestionSerializer, UserSerializer
 from .serializers import SolutionSerializer, PointSerializer, GradeSerializer
 from .permissions import ExamSheetPermission, QuestionPermission, IsExamineeOrReadOnly, GradePermissions, PointPermissions
 from rest_framework.permissions import IsAuthenticated
+from .pagination import NewLimitOffsetPagination
 
 
 class UserView(viewsets.ReadOnlyModelViewSet):
@@ -14,6 +15,7 @@ class UserView(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.filter(groups__in=groups)
     serializer_class = UserSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = NewLimitOffsetPagination
     ordering_fields = ['username']
     search_fields = ['username']
 
@@ -21,8 +23,9 @@ class UserView(viewsets.ReadOnlyModelViewSet):
 class ExamSheetView(viewsets.ModelViewSet):
     queryset = ExamSheet.objects.all()
     serializer_class = ExamSheetSerializer
-    permission_classes = [ExamSheetPermission, ]
+    permission_classes = [ExamSheetPermission, IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = NewLimitOffsetPagination
     ordering_fields = ['title']
     search_fields = ['title']
 
@@ -30,8 +33,9 @@ class ExamSheetView(viewsets.ModelViewSet):
 class QuestionView(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = [QuestionPermission, ]
+    permission_classes = [QuestionPermission, IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = NewLimitOffsetPagination
     ordering_fields = ['text']
     search_fields = ['text']
 
@@ -39,8 +43,9 @@ class QuestionView(viewsets.ModelViewSet):
 class SolutionView(viewsets.ModelViewSet):
     queryset = Solution.objects.all()
     serializer_class = SolutionSerializer
-    permission_classes = [IsExamineeOrReadOnly, ]
+    permission_classes = [IsExamineeOrReadOnly, IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = NewLimitOffsetPagination
     ordering_fields = ['given_text']
     search_fields = ['given_text']
 
@@ -48,10 +53,12 @@ class SolutionView(viewsets.ModelViewSet):
 class PointView(viewsets.ModelViewSet):
     queryset = Point.objects.all()
     serializer_class = PointSerializer
-    permission_classes = [PointPermissions]
+    permission_classes = [PointPermissions, IsAuthenticated]
+    pagination_class = NewLimitOffsetPagination
 
 
 class GradeView(viewsets.ModelViewSet):
     queryset = Grade.objects.all()
     serializer_class = GradeSerializer
-    permission_classes = [GradePermissions, ]
+    permission_classes = [GradePermissions, IsAuthenticated]
+    pagination_class = NewLimitOffsetPagination

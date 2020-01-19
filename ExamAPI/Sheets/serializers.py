@@ -18,9 +18,9 @@ class UserSerializer(serializers.ModelSerializer):
         group = Group.objects.filter(name="teachers")
         users = User.objects.filter(groups__in=group)
         if obj in users:
-            return "teacher"
+            return "teachers"
         else:
-            return "student"
+            return "students"
 
     def get_owned_exams(self, obj):
         """
@@ -76,6 +76,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 
 # BIG PROBLEM WITH THIS FOREIGN KEYES
 class SolutionSerializer(serializers.HyperlinkedModelSerializer):
+    score = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         """
@@ -83,11 +84,17 @@ class SolutionSerializer(serializers.HyperlinkedModelSerializer):
         """
         super(SolutionSerializer, self).__init__(*args, **kwargs)
         groups = Group.objects.filter(name="students")
-        self.fields['examinee'].queryset = User.objects.filter(groups__in=groups)
+        user = self.context['request'].user
+        self.fields['examinee'].queryset = User.objects.filter(groups__in=groups, username=user.username)
 
     class Meta:
         model = Solution
-        fields = ['examinee', 'to_question', 'given_text']
+        fields = ['date','examinee', 'to_question', 'given_text', 'url', 'score']
+        read_only_fields = ['date']
+
+    def get_score(self, obj):
+        score = Point.objects.filter(answer=obj.id).first()
+        return score.points
 
 
 class PointSerializer(serializers.ModelSerializer):

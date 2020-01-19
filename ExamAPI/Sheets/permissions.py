@@ -57,7 +57,7 @@ class PointPermissions(BasePermission):
         if request.method in SAFE_METHODS:
             return True
 
-        return request.user == obj.answer.question.sheet.owner
+        return request.user == obj.answer.to_question.sheet.owner
 
 
 class GradePermissions(BasePermission):

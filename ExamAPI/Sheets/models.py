@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 # Create your models here.
 
 
@@ -38,7 +39,7 @@ class Solution(models.Model):
     examinee = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     to_question = models.ForeignKey(Question, on_delete=models.DO_NOTHING)
     given_text = models.CharField(max_length=100)
-    # date = models.DateField(default=date) # TODO propable to add
+    date = models.DateTimeField(default=now)
 
     def __str__(self):
         return "Asnwer: "+ str(self.given_text) + " BY: " + str(self.examinee)
